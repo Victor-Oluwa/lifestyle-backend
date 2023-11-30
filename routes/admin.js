@@ -10,7 +10,9 @@ const Order = require("../models/order");
 const User = require("../models/user");
 
 const fireAdmin = require("firebase-admin");
-const serverkey = require('C:/Flutter/Projects/Production/Lifestyle-main/server/config/serverkey.json');
+// const serverkey = require('C:/Flutter/Projects/Production/Lifestyle-main/server/config/serverkey.json');
+const serverkey = JSON.parse(process.env.JSON_DATA);;
+
 fireAdmin.initializeApp({
   credential: fireAdmin.credential.cert(serverkey),
 });
