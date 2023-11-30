@@ -1,0 +1,169 @@
+# Node.js
+node_modules/
+npm-debug.log
+*.log
+*.lock
+
+# Express
+.env
+
+# MongoDB
+data/
+dump/
+*.db
+
+# Build tools
+dist/
+build/
+tmp/
+
+# Editor-specific
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+
+# Logs
+logs/
+*.log
+
+# Dependency directories
+.jenkins/
+
+# Configuration files
+*.json
+*.xml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+*~
+
+# Visual Studio Code
+.vscode/
+.settings/
+
+# Build results
+*.pid
+
+# Docker
+docker-compose.override.yml
+DockerDebug.log
+*.pem
+*.key
+
+# Test directory
+test/
+
+# Deployment files
+.deploy/
+
+# Environment-specific files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Package-lock files
+package-lock.json
+yarn.lock
+
+# Serverless framework
+.serverless/
+
+# Coverage output
+coverage/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# ESLint
+.eslintcache
+
+# Dependency directories
+.env
+
+# Next.js
+.next/
+out/
+
+# Nuxt.js
+.nuxt/
+dist/
+
+# Svelte
+__sapper__/
+
+# Parcel
+.cache/
+
+# Yarn
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.pnp.*
+
+# Node.js error files
+error.log
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Kubernetes
+.kube/
+
+# Helm
+*.helmignore
+
+# Helm Charts
+charts/
+*.tgz
+
+# Local .env files
+.env.local
+.env.*.local
+
+# node dependencies
+node_modules/
+jspm_packages/
+bower_components/
+web_modules/
+
+npm-debug.log
+yarn-error.lo
+yarn-debug.log
+lerna-debug.log
+node_modules/**/node_modules
+node_modules/
+.secrets.json
+dist/
+.DS_Store
+serverKey.json
+config/
+
+# dotenv environment variables
+.env
+.env.test
+.custom-env
+
+# code editor related files
+.vscode-test
+.vscode
+
+# cache files
+.yarn/cache
+.yarn/unplugged
+.yarn/install-state.gz
+.eslintcache
+.cache
+.parcel-cache
+.npm
+
+# Anything in .gitignore is ignored!
+# More details: https://git-scm.com/docs/gitignore
+
