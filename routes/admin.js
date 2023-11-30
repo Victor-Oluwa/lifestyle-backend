@@ -4,7 +4,7 @@ const admin = require("../middleweres/admin");
 const paystackAuth = require("../middleweres/paystack");
 const axios = require("axios");
 const cors = require("cors");
-require('dotenv').config();
+require('dotenv').config({ silent: true });
 const { Product } = require("../models/product");
 const Order = require("../models/order");
 const User = require("../models/user");
