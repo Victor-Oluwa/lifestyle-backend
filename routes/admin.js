@@ -8,9 +8,11 @@ require('dotenv').config({ silent: true });
 const { Product } = require("../models/product");
 const Order = require("../models/order");
 const User = require("../models/user");
-
-const fireAdmin = require("firebase-admin");
+const firebaseAdmin = require("firebase-admin");
+const { Notifications } = require("../models/notifications");
 // const serverkey = require('C:/Flutter/Projects/Production/Lifestyle-main/server/config/serverkey.json');
+
+
 const type = process.env.TYPE;
 const universal_domain = process.env.UNIVERSE_DOMAIN;
 const cert_url = process.env.CLIENT_CERT_URL;
@@ -38,17 +40,14 @@ const serverkey = {
 };
 
 
-fireAdmin.initializeApp({
-  credential: fireAdmin.credential.cert(serverkey),
+firebaseAdmin.initializeApp({
+  credential: firebaseAdmin.credential.cert(serverkey),
 });
 
 
-
-
-// require("dotenv").config();
-
 adminRouter.post("/admin/add-new-product", admin, async (req, res) => {
   try {
+
     const {
       name,
       description,
@@ -61,6 +60,8 @@ adminRouter.post("/admin/add-new-product", admin, async (req, res) => {
       models,
       createdAt,
     } = req.body;
+
+
 
     let product = new Product({
       name: name,
@@ -215,8 +216,8 @@ adminRouter.get("/admin/get-users", async (req, res) => {
     // console.log(users);
     return res.json(users);
   } catch (error) {
-    console.log("Fetch User Error: " + e);
-    res.status(500).json({ error: e.message });
+    console.log("Fetch User Error: " + error);
+    res.status(500).json({ error: error.message });
   }
 });
 //Delete Product
@@ -421,9 +422,12 @@ adminRouter.get("/admin/get-order-status/:id", async (req, res) => {
   }
 });
 //.....................................................................................................................
+
+
+
 adminRouter.post("/send-notification", async (req, res) => {
 
-  const { userIds, title, body } = req.body;
+  const { userIds, title, body, image, action } = req.body;
   console.log(`Found ${userIds.length} user IDs`);
 
   try {
@@ -433,6 +437,7 @@ adminRouter.post("/send-notification", async (req, res) => {
     }
 
     const tokens = [];
+
     for (const userId of userIds) {
       const user = await User.findOne({ _id: userId });
       if (user && user.fcmToken != '') {
@@ -442,17 +447,21 @@ adminRouter.post("/send-notification", async (req, res) => {
 
     console.log(`${tokens.length} user FCM tokens retrieved`);
 
-
     let message = {
       notification: {
         title: title,
         body: body,
       },
+      data: {
+        image: image,
+        action: action,
+      },
       tokens: tokens,
     };
 
-    await fireAdmin.messaging().sendEachForMulticast(message)
+    await firebaseAdmin.messaging().sendEachForMulticast(message)
       .then((response) => {
+        saveNotification(userIds, image, title, body, action);
         console.log(response.successCount + ' message(s) sent successfully');
         res.status(200).json(response);
       })
@@ -461,12 +470,31 @@ adminRouter.post("/send-notification", async (req, res) => {
         res.status(500).json({ error: 'Error sending message' });
       });
 
-    // res.status(200).json(response);
-
-
   } catch (e) {
     console.log(`Failed to send notification: ${e}`);
     res.status(404).json(`Failed to send notification: ${e}`)
+  }
+
+  async function saveNotification(userIds, image, title, body, action) {
+    const notification =
+    {
+      image: image,
+      title: title,
+      message: body,
+      action: action,
+    };
+
+    for (let i = 0; i < userIds.length; i++) {
+      let user = await User.findById(userIds[i]);
+      if (!user) {
+        return;
+      }
+      user.notifications.push({ notification: notification });
+      await user.save();
+    }
+
+    console.log(`Notification saved`);
+
   }
 
 
