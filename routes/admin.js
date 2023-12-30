@@ -9,7 +9,6 @@ const { Product } = require("../models/product");
 const Order = require("../models/order");
 const User = require("../models/user");
 const firebaseAdmin = require("firebase-admin");
-const { Notifications } = require("../models/notifications");
 // const serverkey = require('C:/Flutter/Projects/Production/Lifestyle-main/server/config/serverkey.json');
 
 
@@ -427,7 +426,7 @@ adminRouter.get("/admin/get-order-status/:id", async (req, res) => {
 
 adminRouter.post("/send-notification", async (req, res) => {
 
-  const { userIds, title, body, image, action } = req.body;
+  const { userIds, title, preview, body, read, action, actionData, } = req.body;
   console.log(`Found ${userIds.length} user IDs`);
 
   try {
@@ -453,15 +452,16 @@ adminRouter.post("/send-notification", async (req, res) => {
         body: body,
       },
       data: {
-        image: image,
         action: action,
+        actionData: actionData,
+        preview: preview,
       },
       tokens: tokens,
     };
 
     await firebaseAdmin.messaging().sendEachForMulticast(message)
       .then((response) => {
-        saveNotification(userIds, image, title, body, action);
+        saveNotification(userIds, title, preview, body, read, action, actionData);
         console.log(response.successCount + ' message(s) sent successfully');
         res.status(200).json(response);
       })
@@ -470,26 +470,34 @@ adminRouter.post("/send-notification", async (req, res) => {
         res.status(500).json({ error: 'Error sending message' });
       });
 
+
+
   } catch (e) {
     console.log(`Failed to send notification: ${e}`);
     res.status(404).json(`Failed to send notification: ${e}`)
   }
 
-  async function saveNotification(userIds, image, title, body, action) {
-    const notification =
-    {
-      image: image,
-      title: title,
-      message: body,
-      action: action,
-    };
+  async function saveNotification(userIds, title, preview, body, read, action, actionData,) {
 
     for (let i = 0; i < userIds.length; i++) {
       let user = await User.findById(userIds[i]);
+
       if (!user) {
         return;
       }
-      user.notifications.push({ notification: notification });
+      const notification =
+      {
+        userId: userIds[i],
+        title: title,
+        preview: preview,
+        message: body,
+        read: read,
+        date: new Date().getTime(),
+        action: action,
+        actionData: actionData
+      };
+
+      user.notifications.push(notification);
       await user.save();
     }
 
@@ -497,8 +505,41 @@ adminRouter.post("/send-notification", async (req, res) => {
 
   }
 
+});
 
+adminRouter.get('/user/notifications/:userId', async (req, res) => {
 
+  try {
+    const { userId } = req.params;
+
+    let user = await findUserById(userId);
+    const notifications = await getUserNotification(user);
+
+    res.status(200).json(notifications);
+    await user.save();
+
+  } catch (e) {
+    console.log(`Failed to get notification: ${e}`);
+    res.status(500).json(e);
+  }
+
+  async function findUserById(userId) {
+    let user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
+  }
+
+  async function getUserNotification(user) {
+    let notifications = await user.notifications;
+    if (!notifications) {
+      throw new Error('Failed to notifications from user object')
+    }
+    return notifications;
+  }
 });
 
 module.exports = adminRouter;

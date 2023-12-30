@@ -12,9 +12,7 @@ const productRouter = require("./routes/product");
 const userRouter = require("./routes/user");
 const paystackAuth = require("./middleweres/paystack");
 const { env } = require("process");
-const { Notifications } = require("./models/notifications");
 const User = require("./models/user");
-
 //INIT
 const PORT = process.env.PORT || 3000;
 const app = express();

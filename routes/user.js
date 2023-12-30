@@ -459,7 +459,6 @@ userRouter.get('/cart/sync/:userId', async (req, res) => {
     let user = await findUserById(userId);
     let userCart = getUserCart(user);
     user = await user.save();
-    console.log(userCart);
     res.status(200).json(userCart);
 
   } catch (e) {
@@ -477,7 +476,7 @@ userRouter.get('/cart/sync/:userId', async (req, res) => {
   }
 
   function getUserCart(user) {
-    userCart = user.cart;
+    let userCart = user.cart;
     return userCart;
   }
 });

@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 const { productSchema } = require("./product");
-const { notificationSchema } = require("./notifications");
-
 
 const userSchema = mongoose.Schema({
   name: {
@@ -57,7 +55,38 @@ const userSchema = mongoose.Schema({
   ],
   notifications: [
     {
-      notification: notificationSchema,
+      userId: {
+        type: String,
+        required: true,
+      },
+      title: {
+        type: String,
+        default: ""
+      },
+      preview: {
+        type: String,
+        required: true,
+      },
+      message: {
+        type: String,
+        default: ""
+      },
+      action: {
+        type: String,
+        required: true
+      },
+      actionData: {
+        type: String,
+        default: ""
+      },
+      read: {
+        type: Boolean,
+        default: false
+      },
+      date: {
+        required: true,
+        type: Number,
+      },
     }
   ]
 });
