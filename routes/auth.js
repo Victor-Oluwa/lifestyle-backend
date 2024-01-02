@@ -39,25 +39,36 @@ authRouter.post("/api/signup", async (req, res) => {
 authRouter.post("/api/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    // console.log(res.toString());
 
-    if (!user) {
-      return res.status(102).json("User does not exist");
-    }
+    const user = await findUserByEmail(email);
+    await matchPassword(password, user)
 
-    const isMatch = await bcryptjs.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(101).json("Incorrect Password");
-    }
     const token = jwt.sign({ id: user._id }, "passwordKey");
-
     res.status(200).json({ token, ...user._doc });
 
   } catch (e) {
-    console.log(`Could not signIn. Check your connection: ${e}`);
+    res.status(500).json(e);
+    console.log(`Could not signIn: ${e}`);
+  }
+
+  async function findUserByEmail(email) {
+    let user = await User.findOne({ email });
+    if (!user) {
+      throw new Error(`Incorrect Email`)
+    }
+    return user
+  }
+
+  async function matchPassword(password, user) {
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) {
+      throw new Error(`Incorrect Password`);
+    }
+    return isMatch;
   }
 });
+
+
 
 authRouter.post("/tokenIsValid", async (req, res) => {
   try {
