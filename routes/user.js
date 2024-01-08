@@ -190,7 +190,7 @@ userRouter.post("/api/order", auth, async (req, res) => {
     res.status(200).json(order);
   } catch (error) {
 
-    res.status(400).json(`Some items are out of stock`);
+    res.status(500).json(`An error occurred: ${error.message}`);
 
   }
 
@@ -478,6 +478,78 @@ userRouter.get('/cart/sync/:userId', async (req, res) => {
   function getUserCart(user) {
     let userCart = user.cart;
     return userCart;
+  }
+});
+
+userRouter.post('/notification/delete', async (req, res) => {
+
+  try {
+    const { userId, notificationId } = req.body
+
+    let user = await findUserById(userId);
+
+    await deleteNotification(notificationId, user)
+    res.status(200).json(user.notifications);
+  } catch (e) {
+    console.log(`Failed to delete notification: ${e}`);
+    res.status(500).json(`Failed to delete notification: ${e.message}`);
+  }
+
+  async function findUserById(id) {
+    const user = await User.findById(id);
+    if (!user) {
+      throw new Error("User not found");
+
+    }
+    return user;
+  }
+
+  async function deleteNotification(id, user) {
+    let notificationIndex = user.notifications.findIndex((notification) => notification._id.equals(id));
+    if (notificationIndex == -1) {
+      throw new Error("Notification not found");
+
+    }
+    user.notifications.splice(notificationIndex, 1);
+    user = await user.save();
+    return user;
+  }
+});
+
+userRouter.post('/notification/read', async (req, res) => {
+
+  try {
+    const { userId, notificationId } = req.body
+
+    let user = await findUserById(userId);
+
+    await readNotification(notificationId, user)
+    res.status(200).json(user.notifications);
+  } catch (e) {
+    console.log(`Failed to delete notification: ${e}`);
+    res.status(500).json(`Failed to delete notification: ${e.message}`);
+  }
+
+  async function findUserById(id) {
+    const user = await User.findById(id);
+    if (!user) {
+      throw new Error("User not found");
+
+    }
+    return user;
+  }
+
+  async function readNotification(id, user) {
+    let notificationIndex = user.notifications.findIndex((notification) => notification._id.equals(id));
+    if (notificationIndex == -1) {
+      throw new Error("Notification not found");
+
+    }
+    if (user.notifications[notificationIndex].read == false) {
+      user.notifications[notificationIndex].read = true;
+    }
+    user = await user.save();
+    return user;
   }
 });
 

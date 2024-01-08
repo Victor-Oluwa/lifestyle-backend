@@ -10,7 +10,7 @@ authRouter.post("/api/signup", async (req, res) => {
 
   try {
 
-    const { name, email, password } = req.body;
+    const { name, email, password, address, phone } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -22,6 +22,8 @@ authRouter.post("/api/signup", async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      address,
+      phone,
     });
     user = await user.save();
 
@@ -39,7 +41,7 @@ authRouter.post("/api/signup", async (req, res) => {
 authRouter.post("/api/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    console.log(`Signing in`);
     const user = await findUserByEmail(email);
     await matchPassword(password, user)
 
@@ -47,22 +49,31 @@ authRouter.post("/api/signin", async (req, res) => {
     res.status(200).json({ token, ...user._doc });
 
   } catch (e) {
-    res.status(500).json(e);
+    const wrongPasswordMessage = Error("Incorrect Password");
+    const wrongEmailMessage = Error("Incorrect Email");
+    if (e = wrongPasswordMessage) {
+      res.status(123).json(e.message);
+    } else if (e = wrongEmailMessage) {
+      res.status(246).json(e.message);
+    } else {
+      res.status(500).json(e.message);
+
+    }
     console.log(`Could not signIn: ${e}`);
   }
 
   async function findUserByEmail(email) {
     let user = await User.findOne({ email });
     if (!user) {
-      throw new Error(`Incorrect Email`)
+      throw new Error("Incorrect Email");
     }
-    return user
+    return user;
   }
 
   async function matchPassword(password, user) {
     const isMatch = await bcryptjs.compare(password, user.password);
     if (!isMatch) {
-      throw new Error(`Incorrect Password`);
+      throw new Error("Incorrect Password");
     }
     return isMatch;
   }

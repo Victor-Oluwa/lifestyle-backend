@@ -268,10 +268,13 @@ adminRouter.get("/admin/get-orders", admin, async (req, res) => {
 adminRouter.get("/admin/get-failed-orders", admin, async (req, res) => {
   try {
     const orders = await Order.find({});
-    paidOrders = orders.filter(order => order.paid == false);
-    res.json(paidOrders);
+    failedOrders = orders.filter(order => order.paid == false);
+    failedOrders.forEach(order => {
+      Order.findByIdAndDelete(order.id);
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
+    console.log(`Failed to delete failed orders ${e}`);
   }
 });
 
@@ -331,12 +334,13 @@ async function fetchCategoryWiseProducts(category) {
 adminRouter.get("/admin/get-order-status/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    let orders = await Order.findById(id);
-    let orderStatus = orders.status;
-    console.log("Order status is: " + orderStatus);
-    console.log("Passed id: " + id);
+    let order = await Order.findById(id);
+    let orderStatus = order.status;
+    await order.save();
+    // console.log("Order status is: " + orderStatus);
+    // console.log("Passed id: " + id);
 
-    res.json(orderStatus);
+    res.json(order);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

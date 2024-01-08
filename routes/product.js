@@ -60,5 +60,39 @@ productRouter.get('/product/quantity/:productId', auth, async (req, res) => {
   }
 });
 
+productRouter.post('/product/latest/update/:productId', async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    let product = await findProductById(productId);
+    product = await updateProduct(product);
+
+    console.log(product.latest);
+    res.status(200).json(product);
+
+  } catch (e) {
+    res.status(500).json(e.message);
+    console.log(`Failed to update product: ${e}`);
+  }
+
+  async function findProductById(id) {
+    let product = await Product.findById(id);
+    if (!product) {
+      throw new Error("Prouct not found");
+    }
+
+    return product;
+  }
+
+  async function updateProduct(product) {
+
+    product.latest = !product.latest;
+
+    await product.save();
+
+    return product;
+  }
+});
+
 
 module.exports = productRouter;
