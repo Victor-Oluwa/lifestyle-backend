@@ -434,23 +434,39 @@ userRouter.post('/order/approve', async (req, res) => {
   try {
     const { orderId, userId } = req.body;
     let order = await Order.findById(orderId);
-    let user = await User.findById(userId);
-
+    let user = await findUserById(userId);
 
     if (order) {
       await approveOrder(order);
+      user = await clearCart(user);
       order = await order.save();
-      res.status(201).json(user);
+      user = await user.save();
+
+      res.status(200).json(user);
     }
 
+
   } catch (e) {
-    console.log('Order Approval Error: ' + e);
-    // res.status(500).json({ error: e.toString() });
+    console.log('Order Approval Error: ' + e.message);
+    res.status(500).json({ error: e.message });
   }
 
   async function approveOrder(order) {
     order.paid = true;
   }
+  async function findUserById(userId) {
+    let user = await User.findById(userId);
+    if (!user) {
+      throw new Error(`Uer not found`);
+    }
+    return user;
+  }
+
+  async function clearCart(user) {
+    user.cart = [];
+    return user;
+  }
+  //Clear user cart
 });
 
 userRouter.get('/cart/sync/:userId', async (req, res) => {

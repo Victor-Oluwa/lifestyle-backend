@@ -347,7 +347,9 @@ adminRouter.get("/admin/get-order-status/:id", async (req, res) => {
 });
 //.....................................................................................................................
 adminRouter.post("/transaction-initialize", async (req, res) => {
-  const sk_key = process.env.PAYMENT_SECRET_KEY;
+  // const sk_key = process.env.PAYMENT_SECRET_KEY;
+  const sk_key = process.env.PAYMENT_TEST_SECRET_KEY;
+
 
 
   try {
@@ -368,7 +370,9 @@ adminRouter.post("/transaction-initialize", async (req, res) => {
     res.status(200).json(response.data);
   } catch (e) {
     // const result = e.data;
-    res.sendStatus(e.response.status ? 700 : e.response.status);
+    // res.sendStatus(e.response.status ? 700 : e.response.status);
+    res.sendStatus(e.status);
+
     console.log(e);
   }
 });
